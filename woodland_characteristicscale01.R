@@ -209,7 +209,7 @@ for(i in radii){
 #inspect
 head(glmRes)
 
-plot(glmRes$radius, glmRes$loglikelihood, type = "b", frame = FALSE, pch = 19, 
+plot(glmRes$radius, glmRes$loglikelihood, type = "b", frame = FALSE, pch = 19,  
      col = "red", xlab = "buffer", ylab = "logLik")
 
 # finding the max loglikelihood then determine the optimum buffer size
