@@ -400,3 +400,27 @@ ggplot(auc_results, aes(x = Model, y = AUC)) +
        x = "Model",
        y = "AUC") +
   theme_minimal()
+
+#Specify the model
+glm.melesmeles=glm(Pres~broadleaf+urban+elev,
+                   binomial(link='logit'),
+                   data=all.cov)
+#predict and inspect the output
+prGLM=predict(allEnv,glm.melesmeles,type="response")
+#plot prediction map
+plot(prGLM)
+
+
+
+#fit Random Forest model
+rf.melesmeles = ranger::ranger(
+  Pres ~ broadleaf + urban + elev,
+  data = all.cov,
+  probability = TRUE
+)
+
+#predict across raster stack
+prRF = predict(allEnv, rf.melesmeles, type = "response")
+
+#if output has two layers, select probability of presence
+plot(prRF[[2]], main = "Random Forest prediction")
