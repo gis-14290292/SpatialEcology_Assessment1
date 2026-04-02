@@ -204,3 +204,13 @@ weightsMatrixUrban[!is.na(weightsMatrixUrban)]=1/length(weightsMatrixUrban[!is.n
 #sum urban class from all surrounding cells
 lcm_urban_1500=focal(urban,w=weightsMatrixUrban,fun="sum")
 plot(lcm_urban_1500)
+
+
+demScot=rast('demScotland.tif')
+demScot=terra::resample(demScot,lcm_wood_900)
+#inspect
+plot(demScot)
+
+#stack the covariate layers together
+allEnv=c(lcm_wood_900,lcm_urban_1500,demScot)
+names(allEnv)=c("broadleaf","urban","elev")
