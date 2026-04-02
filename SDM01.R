@@ -376,3 +376,27 @@ tuned_RF = tuneParams(learner = lrnRF,
                       show.info = FALSE)
 
 print(tuned_RF)
+
+
+#plot AUC result
+auc_results <- data.frame(
+  Model = c("GLM_nonspatial", "GLM_spatial", "RF_nonspatial", "RF_spatial"),
+  AUC = c(
+    cvBinomial$aggr,
+    sp_cvBinomial$aggr,
+    cvRF$aggr,
+    sp_cvRF$aggr
+  )
+)
+
+print(auc_results)
+
+library(ggplot2)
+
+ggplot(auc_results, aes(x = Model, y = AUC)) +
+  geom_col() +
+  ylim(0, 1) +
+  labs(title = "Model performance comparison",
+       x = "Model",
+       y = "AUC") +
+  theme_minimal()
