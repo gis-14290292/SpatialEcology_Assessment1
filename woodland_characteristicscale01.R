@@ -70,3 +70,45 @@ hist(eP[,2],freq=FALSE,breaks=c(0:21),xlim=c(0,21),ylim=c(0,1))
 hist(eA[,2],freq=FALSE,breaks=c(0:21),xlim=c(0,21),ylim=c(0,0.4))
 hist(eP[,2],freq=FALSE,breaks=c(0:21),xlim=c(0,21),ylim=c(0,0.4))
 
+#create a data frame of absence/background point coordinates
+Abs<-data.frame(crds(back.xy),Pres=0)
+
+#inspect the first few rows of the absence/background dataset
+head(Abs)
+
+Pres<-data.frame(crds(melesmelesFin),Pres=1)
+
+#inspect the first few rows of the presence dataset
+head(Pres)
+
+
+#bind the two data frames by row 
+melesmelesData<-rbind(Pres,Abs)
+
+
+melesmelesSF=st_as_sf(melesmelesData,coords=c("x","y"),crs="EPSG:27700")
+
+#access levels of the raster by treating them as categorical data ('factors' in R)
+LCM<-as.factor(LCM)
+levels(LCM)
+
+#create an vector object called reclass
+reclass <- c(0,1,rep(0,19))
+
+# combine with the LCM categories into a matrix of old and new values.
+RCmatrix<- cbind(levels(LCM)[[1]],reclass)
+RCmatrix<-RCmatrix[,2:3]
+
+#apply function to make sure new columns are numeric (here the "2" specifies that we want to apply the as.numeric function to columns, where "1" would have specified rows)
+RCmatrix=apply(RCmatrix,2,FUN=as.numeric)
+#Use the reclassify() function to asssign new values to LCM with our reclassification matrix
+RCmatrix
+
+broadleaf <- classify(LCM, RCmatrix)
+
+#reset the plotting panel
+dev.off()
+
+#plot
+plot(broadleaf)
+plot(melesmelesFin,add=TRUE)
