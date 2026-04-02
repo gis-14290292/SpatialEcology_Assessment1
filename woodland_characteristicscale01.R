@@ -112,3 +112,30 @@ dev.off()
 #plot
 plot(broadleaf)
 plot(melesmelesFin,add=TRUE)
+
+#create an object to hold the distance parameter for our buffer
+buf5km<-5000 
+
+# use the st_buffer() function from the sf package applied to the first item of melesmelesFin
+buffer.site1.5km<-st_buffer(melesmelesSF[1,],dist=buf5km) 
+zoom(broadleaf,buffer.site1.5km) # use the zoom() function for a close-up of the result.
+
+plot(buffer.site1.5km$geometry,border="red",lwd=2,add=T) # add the buffer
+
+#crop the broadleaf layer to the extent of the buffer
+buffer5km <- crop(broadleaf, buffer.site1.5km) 
+
+#clip the above again to the circle described by the buffer (doing this speeds up the process compared to using only the mask() function)
+bufferlandcover5km <- mask(broadleaf, buffer.site1.5km)
+
+#calculate the area of the buffer according to the buffer width
+bufferArea <- (3.14159*buf5km^2) 
+
+#total area of woodland inside the buffer
+landcover5km <- sum(values(bufferlandcover5km),na.rm=T)*625 
+
+#calculate percentage
+percentlandcover5km <- landcover5km/bufferArea*100 
+
+#return the result
+percentlandcover5km
