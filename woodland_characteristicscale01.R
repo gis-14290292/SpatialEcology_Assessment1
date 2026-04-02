@@ -221,3 +221,4 @@ opt<-glmRes[which.max(glmRes$loglikelihood),]
 #print
 opt
 
+
