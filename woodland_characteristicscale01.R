@@ -58,7 +58,7 @@ plot(back.xy,add=TRUE, col='red')
 eA<-extract(LCM,back.xy)
 eP<-extract(LCM,melesmelesFin)
 
-#calculate point frequency per landcover category (headings are landcover category codes - see LCM documentation for descriptions)
+#calculate point frequency per landcover category 
 table(eA[,2])
 table(eP[,2])
 
