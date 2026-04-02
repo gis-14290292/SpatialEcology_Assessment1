@@ -352,3 +352,27 @@ sp_cvRF = resample(learner = lrnRF, task =task,
                    show.info = FALSE)
 
 print(sp_cvRF)
+
+#tune its parameters 
+getParamSet(lrnRF)
+
+paramsRF = makeParamSet(
+  makeIntegerParam("mtry",lower = 1,upper = 3),
+  makeIntegerParam("min.node.size",lower = 1,upper = 20),
+  makeIntegerParam("num.trees",lower = 100,upper = 500)
+)
+# specifying random parameter value search
+
+tune_level = makeResampleDesc(method = "SpCV", iters = 5)
+
+ctrl = makeTuneControlRandom(maxit = 50)
+
+tuned_RF = tuneParams(learner = lrnRF,
+                      task = task,
+                      resampling = tune_level,
+                      measures = mlr::auc,
+                      par.set = paramsRF,
+                      control = ctrl,
+                      show.info = FALSE)
+
+print(tuned_RF)
