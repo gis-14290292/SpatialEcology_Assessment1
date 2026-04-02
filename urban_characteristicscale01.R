@@ -23,3 +23,27 @@ melesmeles.sp<-vect(melesmeles.latlong,geom=c("x","y"))
 crs(melesmeles.sp)<-"epsg:4326"
 
 plot(melesmeles.sp)
+#define study area extent
+studyExtent<-c(-4.2,-2.7,56.5,57.5) #list coordinates in the order: min x, max x, min y, max y
+
+#now crop points to this area
+C<-crop(melesmeles.sp,studyExtent)
+#read in raster data
+LCM=rast("LCMUK.tif")
+
+#project points to same CRS as raster
+melesmelesFin<-project(C,crs(LCM))
+melesmelesCoords<-crds(melesmelesFin)
+
+#make a slightly larger extent around points
+x.min <- min(melesmelesCoords[,1]) - 5000
+x.max <- max(melesmelesCoords[,1]) + 5000
+y.min <- min(melesmelesCoords[,2]) - 5000
+y.max <- max(melesmelesCoords[,2]) + 5000
+extent.new <- ext(x.min, x.max, y.min, y.max)
+
+# crop raster to this extent
+LCM <- crop(LCM$LCMUK_1, extent.new)
+
+plot(LCM)
+plot(melesmelesFin,add=TRUE)
