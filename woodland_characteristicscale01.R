@@ -58,3 +58,18 @@ plot(back.xy,add=TRUE, col='red')
 eA<-extract(LCM,back.xy)
 eP<-extract(LCM,melesmelesFin)
 
+#calculate point frequency per landcover category (headings are landcover category codes - see LCM documentation for descriptions)
+table(eA[,2])
+table(eP[,2])
+
+par(mfrow=c(1,2))
+
+hist(eA[,2],freq=FALSE,breaks=c(0:21),xlim=c(0,21),ylim=c(0,1))
+hist(eP[,2],freq=FALSE,breaks=c(0:21),xlim=c(0,21),ylim=c(0,1))
+
+hist(eA[,2],freq=FALSE,breaks=c(0:21),xlim=c(0,21),ylim=c(0,0.4))
+hist(eP[,2],freq=FALSE,breaks=c(0:21),xlim=c(0,21),ylim=c(0,0.4))
+
+#create a data frame of absence/background point coordinates
+Abs<-data.frame(crds(back.xy),Pres=0)
+
