@@ -184,3 +184,40 @@ colnames(glmData)=paste("radius",radii,sep="")
 head(glmData)
 #add in the presences data
 glmData$Pres<-melesmelesData$Pres
+
+head(glmData)
+
+#make an empty data frame to then add a sequence of results from glms (general linear models) that test the relationship between broadleaf cover and red squirrel presence for the different buffer sizes
+
+#init empty data frame
+glmRes=data.frame(radius=NA,loglikelihood=NA)
+
+#for loop to iterate over radius values and run a general linear model with glm()
+for(i in radii){
+  
+  #build the model formula with format "response variable ~ explanatory variable, family, data"
+  #Here "binomial" is the error distribution normally used for a binary outcome (e.g. 0, 1) 
+  n.i=paste0("Pres~","radius",i,sep ="")
+  
+  glm.i=glm(formula(n.i),family = "binomial",data = glmData)
+  
+  ll.i=as.numeric(logLik(glm.i))
+  
+  glmRes=rbind(glmRes,c(i,ll.i))
+  
+}
+
+#inspect
+head(glmRes)
+
+plot(glmRes$radius, glmRes$loglikelihood, type = "b", frame = FALSE, pch = 19, 
+     col = "red", xlab = "buffer", ylab = "logLik")
+
+# finding the max loglikelihood then determine the optimum buffer size
+#remove the NAs in the first row
+glmRes=glmRes[!is.na(glmRes),]
+
+#use the which.max function to subset the dataframe to the just the row containing the max log likelihood value
+opt<-glmRes[which.max(glmRes$loglikelihood),]
+#print
+opt
