@@ -139,3 +139,48 @@ percentlandcover5km <- landcover5km/bufferArea*100
 
 #return the result
 percentlandcover5km
+
+
+#function for automating whole dataset. The function is set up take two arguments: a data frame and a series of buffer distances.
+landBuffer <- function(speciesData, r){         
+  
+  #buffer each point
+  melesmelesBuffer <- st_buffer(speciesData, dist=r)                     
+  
+  #crop the woodland layer to the buffer extent
+  bufferlandcover <- crop(broadleaf, melesmelesBuffer)              
+  
+  #extract the raster values (which should all be 1 for woodland and 0 for everything else) within each buffer and sum to get number of woodland cells inside the buffers.
+  masklandcover <- extract(bufferlandcover, melesmelesBuffer,fun="sum")      
+  #get woodland area (625 is the area in metres of each cell of our 25m raster)
+  landcoverArea <- masklandcover$LCMUK_1*625  
+  
+  # convert to precentage cover
+  percentcover <- landcoverArea/as.numeric(st_area(melesmelesBuffer))*100 
+  
+  # return the result
+  return(percentcover)                                       
+}
+
+radii<-seq(100,2000,by=100)
+resList=list()
+
+for(i in radii){
+  res.i=landBuffer(speciesData=melesmelesSF,r=i)
+  res.i
+  resList[[i/100]]=res.i
+  print(i)
+}
+#collect all results together
+resFin=do.call("cbind",resList)
+
+#convert to data frame
+glmData=data.frame(resFin)
+
+#assign more intuitive column names
+colnames(glmData)=paste("radius",radii,sep="")
+#inspect
+
+head(glmData)
+#add in the presences data
+glmData$Pres<-melesmelesData$Pres
