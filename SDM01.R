@@ -298,3 +298,57 @@ perf_levelCV = makeResampleDesc(method = "RepCV", predict = "test", folds = 5, r
 #set up resampling strategy for spatial cross-validation
 perf_level_spCV = makeResampleDesc(method = "SpRepCV", folds = 5, reps = 5) #sampling strategy to run five fold re-sampling five times
 
+#Binomial conventional cross validation (K fold)
+cvBinomial = mlr::resample(learner = lrnBinomial, task =task,
+                           resampling = perf_levelCV, 
+                           measures = mlr::auc,
+                           show.info = FALSE)
+
+print(cvBinomial)
+
+#create Spatial Resampling Plots
+plots = createSpatialResamplingPlots(task,resample=cvBinomial,
+                                     crs=crs(allEnv),datum=crs(allEnv),color.test = "red",point.size = 1)
+
+library(cowplot)
+#use the cowplot function to plot all folds out in a grid
+cowplot::plot_grid(plotlist = plots[["Plots"]], ncol = 3, nrow = 2,
+                   labels = plots[["Labels"]])
+
+##Binomial spatial cross validation
+
+sp_cvBinomial = resample(learner = lrnBinomial, task =task,
+                         resampling = perf_level_spCV, 
+                         measures = mlr::auc,
+                         show.info = FALSE)
+
+print(sp_cvBinomial)
+
+#make partition plots
+plotsSP = createSpatialResamplingPlots(task,resample=sp_cvBinomial,
+                                       crs=crs(allEnv),datum=crs(allEnv),color.test = "red",point.size = 1)
+
+#use the cowplot function to plot all folds out in a grid
+cowplot::plot_grid(plotlist = plotsSP[["Plots"]], ncol = 3, nrow = 2,
+                   labels = plotsSP[["Labels"]])
+
+###### Random Forest evaluation
+
+
+##random sampling cross-validation
+
+cvRF = mlr::resample(learner = lrnRF, task =task,
+                     resampling = perf_levelCV, 
+                     measures = mlr::auc,
+                     show.info = FALSE)
+
+print(cvRF)
+
+#spatial partitioning cross-validation
+
+sp_cvRF = resample(learner = lrnRF, task =task,
+                   resampling = perf_level_spCV, 
+                   measures = mlr::auc,
+                   show.info = FALSE)
+
+print(sp_cvRF)
