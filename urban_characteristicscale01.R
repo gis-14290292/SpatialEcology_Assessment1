@@ -112,7 +112,59 @@ urban <- classify(LCM, RCmatrix)
 
 plot(urban)
 plot(melesmelesFin, add = TRUE)
+#reset the plotting panel
+dev.off()
 
+
+#create an object to hold the distance parameter for  buffer
+buf5km<-5000 
+
+#use the st_buffer() function from the sf package applied to the first item of melesmelesFin
+
+buffer.site1.5km<-st_buffer(melesmelesSF[1,],dist=buf5km) 
+zoom(urban,buffer.site1.5km) # use the zoom() function for a close-up of the result.
+
+plot(buffer.site1.5km$geometry,border="red",lwd=2,add=T) # add the buffer
+
+#crop the urban layer to the extent of the buffer
+buffer5km <- crop(urban, buffer.site1.5km) 
+#clip the above again to the circle described by the buffer (doing this speeds up the process compared to using only the mask() function)
+bufferlandcover5km <- mask(urban, buffer.site1.5km)
+
+#calculate the area of the buffer according to the buffer width
+bufferArea <- (3.14159*buf5km^2) 
+
+#total area of woodland inside the buffer (625 is the area in metres of each cell of our 25x25m raster) na.rm=T makes sure any NA values are removed from the calculation (otherwise NA is returned) 
+landcover5km <- sum(values(bufferlandcover5km),na.rm=T)*625 
+
+#calculate percentage
+percentlandcover5km <- landcover5km/bufferArea*100 
+
+#return the result
+percentlandcover5km
+
+
+
+#function for automating whole dataset. The function is set up take two arguments: a data frame and a series of buffer distances.
+landBuffer <- function(speciesData, r){         
+  
+  #buffer each point
+  melesmelesBuffer <- st_buffer(speciesData, dist=r)                     
+  
+  #crop the woodland layer to the buffer extent
+  bufferlandcover <- crop(urban, melesmelesBuffer)              
+  
+  # now extract the raster values (which should all be 1 for woodland and 0 for everything else) within each buffer and sum to get number of woodland cells inside the buffers.
+  masklandcover <- extract(bufferlandcover, melesmelesBuffer,fun="sum")      
+  #get woodland area (625 is the area in metres of each cell of our 25m raster)
+  landcoverArea <- masklandcover$LCMUK_1*625  
+  
+  # convert to precentage cover (we use the st_area() function from the sf package to get the area of our buffer) but convert to a numeric object (because sf applies units i.e. metres which then cant be entered into numeric calculations)
+  percentcover <- landcoverArea/as.numeric(st_area(melesmelesBuffer))*100 
+  
+  # return the result
+  return(percentcover)                                       
+}
 
 
 
