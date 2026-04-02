@@ -424,3 +424,59 @@ prRF = predict(allEnv, rf.melesmeles, type = "response")
 
 #if output has two layers, select probability of presence
 plot(prRF[[2]], main = "Random Forest prediction")
+
+
+#build new data frame based on mean of elev and urban but varying values for broadleaf. 
+glmNew=data.frame(broadleaf=seq(0,max(all.cov$broadleaf),length=1000),
+                  elev=mean(all.cov$elev),
+                  urban=mean(all.cov$urban))
+
+# use type = "response" for probability-scale predictions and chose to return the standard error of the prediction (se.fit=TRUE)   
+preds = predict(glm.melesmeles, newdata = glmNew, type = "response", se.fit = TRUE)
+glmNew$fit = preds$fit
+glmNew$se = preds$se.fit
+
+head(glmNew)
+
+#use ggplot to plot the fitted values against the broadleaf variable. Use the ribbon() function in ggplot to add a 95% confidence interval.
+ggplot(glmNew, aes(x = broadleaf, y = fit)) +
+  
+  geom_ribbon(data = glmNew, aes(y = fit, ymin = fit - 1.96 * se, ymax = fit + 1.96 * se),
+              fill = "blue", alpha = 0.3) +
+  geom_line(data = glmNew, aes(y = fit)) 
+
+
+#build new data frame based on mean of elev and broadleaf but varying values for urban. 
+glmNewUrban=data.frame(urban=seq(0,max(all.cov$urban),length=1000),
+                       elev=mean(all.cov$elev),
+                       broadleaf=mean(all.cov$broadleaf))
+
+
+# use type = "response" for probability-scale predictions    
+predUrban = predict(glm.melesmeles, newdata = glmNewUrban, type = "response", se.fit = TRUE)
+glmNewUrban$fit = predUrban$fit
+glmNewUrban$se = predUrban$se.fit
+
+ggplot(glmNewUrban, aes(x = urban, y = fit)) +
+  
+  geom_ribbon(data = glmNewUrban, aes(y = fit, ymin = fit - 1.96 * se, ymax = fit + 1.96 * se),
+              fill = "blue", alpha = 0.3) +
+  geom_line(data = glmNewUrban, aes(y = fit)) 
+
+#build new data frame based on mean of broaleaf and urban but varying values for elev. 
+glmNewElev=data.frame(elev=seq(0,max(all.cov$elev),length=1000),
+                      urban=mean(all.cov$urban),
+                      broadleaf=mean(all.cov$broadleaf))
+
+
+# use type = "response" for probability-scale predictions    
+predElev = predict(glm.melesmeles, newdata = glmNewElev, type = "response", se.fit = TRUE)
+glmNewElev$fit = predElev$fit
+glmNewElev$se = predElev$se.fit
+
+ggplot(glmNewElev, aes(x = elev, y = fit)) +
+  
+  geom_ribbon(data = glmNewElev, aes(y = fit, ymin = fit - 1.96 * se, ymax = fit + 1.96 * se),
+              fill = "blue", alpha = 0.3) +
+  geom_line(data = glmNewElev, aes(y = fit)) 
+
