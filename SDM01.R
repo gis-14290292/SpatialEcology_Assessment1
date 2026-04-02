@@ -480,3 +480,28 @@ ggplot(glmNewElev, aes(x = elev, y = fit)) +
               fill = "blue", alpha = 0.3) +
   geom_line(data = glmNewElev, aes(y = fit)) 
 
+###### Spatial diagnostic: Ripley's K test of CSR
+
+# first get coordinates of the Meles meles points
+coordsMeles = st_coordinates(melesmelesFin)
+
+# define a simple rectangular study window from the study area extent
+bb = st_bbox(scot)
+
+# create ppp object for the point pattern
+pppMeles = ppp(x = coordsMeles[,1],
+               y = coordsMeles[,2],
+               window = owin(xrange = c(bb["xmin"], bb["xmax"]),
+                             yrange = c(bb["ymin"], bb["ymax"])))
+
+# inspect
+plot(pppMeles, main = "Meles meles point pattern")
+
+# rescale from m to km
+pppMeles = spatstat.geom::rescale(pppMeles, 1000)
+
+# generate CSR envelope using Ripley's K
+Kcsr = envelope(pppMeles, Kest, nsim = 39, VARIANCE = TRUE, nSD = 1, global = TRUE)
+
+# plot and inspect whether the observed pattern falls within the CSR envelope
+plot(Kcsr, shade = c("hi","lo"), legend = TRUE)
